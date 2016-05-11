@@ -7,7 +7,7 @@
 检查到handle_flag为true时便回发给客户端
 '''
 
-import socket, os, re, time
+import socket, os, re, time, database
 from database import datab
 
 class Communication:
@@ -24,6 +24,8 @@ class Communication:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind((addr, com))
         self.sock.listen(1)
+
+        self.right_to_html = False
 
     def send_html_back(self):
         '''
@@ -96,10 +98,20 @@ class Communication:
                     self.connection.send('AC'.encode('utf-8'))
                     self.current_name = self.get_apk_name(buf[3:])
                     self.rev_apk(self.current_name)                 #服务器接收apk文件
+                    datab.add_task(self.current_name)
+
+                    self.right_to_html = False
+                    print('wait...')
+                    while(True):              #服务器等待处理完毕
+                        if(self.right_to_html):
+                            break
+                        time.sleep(0.5)
+
                     self.connection.send('RS'.encode('utf-8'))      #服务器请求发送html结果文件
                     temp = self.connection.recv(1024).decode('utf-8')
                     if(temp == 'AC'):                   #服务器被允许发送结果文件
                         self.send_html_back()           #服务器开始发送结果文件
+
                 elif(buf == 'quit'):
                     break
                 else:

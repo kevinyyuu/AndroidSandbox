@@ -20,7 +20,7 @@ class Datab:
         path = os.getcwd()
         pparent_path = os.path.dirname(path)
         data_path = os.path.join(pparent_path, 'data', 'data.db')
-        self.sql = sqlite3.connect(data_path)
+        self.sql = sqlite3.connect(data_path, check_same_thread=False)  #允许多个线程连接数据库
 
     def query_maxtask_id(self):
         '''
@@ -60,8 +60,10 @@ class Datab:
         elif(type == 'name'):
             column = 1
         data = self.cur.execute('SELECT * FROM apk WHERE id = ' + str(id))
-        ans = data.fetchall()[0][column]
-        return ans
+        ans = data.fetchall()
+        if(ans):
+            return ans[0][column]
+        return 0
 
     def change_propare_id(self, id, state):
         '''
@@ -85,8 +87,15 @@ class Datab:
         :param name:
         :return:
         '''
-        self.cur.execute('INSERT INTO apk VALUES (NULL, "%s", 0, 0)' % name)
+        temp = self.cur.execute('INSERT INTO apk VALUES (NULL, "%s", 0, 0)' % name)
         self.sql.commit()
+
+    def close_sql(self):
+        '''
+        关闭数据库
+        :return:
+        '''
+        self.sql.close()
 
 datab = Datab()
 
