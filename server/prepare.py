@@ -1,4 +1,5 @@
-#-*-coding: utf-8-*-
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
 
 '''
 该模块由process模块调用，用于对apk文件分析处理，
